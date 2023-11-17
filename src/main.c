@@ -42,21 +42,24 @@ const struct device *gpio0_dev = DEVICE_DT_GET(MY_GPIO0);
 
 int main(void)
 {
+	printk("test print \n");
 	int err;
+	//configure gpio0 8 pin as output
 	err = gpio_pin_configure(gpio0_dev, GPIO0_8_CS, GPIO_OUTPUT);
 	if (err < 0)
 	{
 		printk("GPIO0 8 pin configure failed with error %d\n", err);
 		return 0;
 	}
+	//configure gpio0 7 pin as output
 	err = gpio_pin_configure(gpio0_dev, GPIO0_7_CS, GPIO_OUTPUT);
 	if (err < 0)
 	{
 		printk("GPIO0 7 pin configure failed with error %d\n", err);
 		return 0;
 	}
-	gpio_pin_set(gpio0_dev, GPIO0_7_CS, 1); // disable by default
-	gpio_pin_set(gpio0_dev, GPIO0_8_CS, 1); // disable by default
+	gpio_pin_set(gpio0_dev, GPIO0_7_CS, 1); // disable adxl372 by default
+	gpio_pin_set(gpio0_dev, GPIO0_8_CS, 1); // disable adxl362 by default
 
 	uint8_t values[1];
 	while (1)
