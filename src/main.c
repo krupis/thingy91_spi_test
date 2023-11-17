@@ -30,7 +30,7 @@ const struct device *adxl1362_sens = DEVICE_DT_GET(DEFAULT_ADXL362_NODE);
 // CS CONTROL
 struct spi_cs_control ctrl = {
         .gpio = SPI_CS_GPIOS_DT_SPEC_GET(DT_NODELABEL(adxl362)),
-        .delay = 2,
+        .delay = 0,
 };
 
 // SPI CONFIG
