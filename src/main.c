@@ -17,7 +17,6 @@ LOG_MODULE_REGISTER(main);
 #define ADXL362_REG_DEVID_MST 0x01
 #define ADXL362_REG_PARTID 0x02
 
-
 static int readRegister(uint8_t reg, uint8_t *values, uint8_t size);
 
 #define DEFAULT_ADXL362_NODE DT_ALIAS(adxl362)
@@ -36,23 +35,28 @@ static const struct spi_config spi_cfg = {
 };
 
 // CS GPIO CONFIG
- #define MY_GPIO0 DT_NODELABEL(gpio0)
- #define GPIO0_8_CS 8
- const struct device* gpio0_dev = DEVICE_DT_GET(MY_GPIO0);
+#define MY_GPIO0 DT_NODELABEL(gpio0)
+#define GPIO0_8_CS 8
+#define GPIO0_7_CS 8
+const struct device *gpio0_dev = DEVICE_DT_GET(MY_GPIO0);
 
 int main(void)
 {
 	int err;
-	printk("Program started \n");
-	err = gpio_pin_configure(gpio0_dev,GPIO0_8_CS,GPIO_OUTPUT);
-	 if (err < 0)
-	 {
-	 	printk("GPIO pin configure failed with error %d\n", err);
-	 	return 0;
-	 }
-	gpio_pin_set(gpio0_dev,GPIO0_8_CS,1);
-	k_msleep(1000);
-	printk("getting into while loop \n");
+	err = gpio_pin_configure(gpio0_dev, GPIO0_8_CS, GPIO_OUTPUT);
+	if (err < 0)
+	{
+		printk("GPIO0 8 pin configure failed with error %d\n", err);
+		return 0;
+	}
+	err = gpio_pin_configure(gpio0_dev, GPIO0_7_CS, GPIO_OUTPUT);
+	if (err < 0)
+	{
+		printk("GPIO0 7 pin configure failed with error %d\n", err);
+		return 0;
+	}
+	gpio_pin_set(gpio0_dev, GPIO0_7_CS, 1); // disable by default
+	gpio_pin_set(gpio0_dev, GPIO0_8_CS, 1); // disable by default
 
 	uint8_t values[1];
 	while (1)
@@ -71,8 +75,6 @@ int main(void)
 	}
 	return 0;
 }
-
-
 
 static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 {
