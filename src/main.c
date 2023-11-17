@@ -42,16 +42,16 @@ const struct device *gpio0_dev = DEVICE_DT_GET(MY_GPIO0);
 
 int main(void)
 {
-	printk("test print \n");
+	printk("test print\n");
 	int err;
-	//configure gpio0 8 pin as output
+	// configure gpio0 8 pin as output
 	err = gpio_pin_configure(gpio0_dev, GPIO0_8_CS, GPIO_OUTPUT);
 	if (err < 0)
 	{
 		printk("GPIO0 8 pin configure failed with error %d\n", err);
 		return 0;
 	}
-	//configure gpio0 7 pin as output
+	// configure gpio0 7 pin as output
 	err = gpio_pin_configure(gpio0_dev, GPIO0_7_CS, GPIO_OUTPUT);
 	if (err < 0)
 	{
