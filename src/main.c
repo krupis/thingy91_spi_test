@@ -11,18 +11,16 @@ LOG_MODULE_REGISTER(main);
 
 
 // Define the CS pin
-// #define CS_PIN 8
-// const struct device *gpio_dev;
-
-#define MY_GPIO0 DT_NODELABEL(gpio0)
-#define GPIO0_8_CS 8
-const struct device* gpio0_dev = DEVICE_DT_GET(MY_GPIO0);
+#define CS_PIN 8
+const struct device *gpio_dev;
 
 int main(void)
 {
 	int err;
-	printk("Program started \n");
-	gpio_pin_configure(gpio0_dev, GPIO0_8_CS, GPIO_OUTPUT);
+	printk("Program started printk\n");
+	printf("Program started pritnf \n");
+	LOG_DBG("Program started log_dbg\n");
+	gpio_pin_configure(gpio_dev, CS_PIN, GPIO_OUTPUT);
 
 	if (err < 0)
 	{
@@ -33,4 +31,3 @@ int main(void)
 	printk("getting into while loop \n");
 	return 0;
 }
-
