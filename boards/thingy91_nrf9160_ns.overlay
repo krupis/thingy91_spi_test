@@ -3,3 +3,29 @@
             adxl362 = &adxl362;
     };
 };
+
+
+
+&spi3 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	cs-gpios = <&gpio0 8 GPIO_ACTIVE_LOW>, <&gpio0 7 GPIO_ACTIVE_LOW>;
+
+	pinctrl-0 = <&spi3_default>;
+	pinctrl-1 = <&spi3_sleep>;
+	pinctrl-names = "default", "sleep";
+	adxl362: adxl362@0 {
+		compatible = "adi,adxl362";
+		spi-max-frequency = <8000000>;
+        label = "spi_dev1";
+		reg = <0>;
+		int1-gpios = <&gpio0 9 0>;
+	};
+
+	adxl372: adxl372@1 {
+		compatible = "adi,adxl372";
+		spi-max-frequency = <8000000>;
+		reg = <1>;
+		int1-gpios = <&gpio0 6 0>;
+	};
+};

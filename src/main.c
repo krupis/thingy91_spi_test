@@ -20,31 +20,63 @@ LOG_MODULE_REGISTER(main);
 
 static int readRegister(uint8_t reg, uint8_t *values, uint8_t size);
 
-#define DEFAULT_ADXL362_NODE DT_ALIAS(adxl362)
-BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_ADXL362_NODE, okay),
-			 "ADXL362 not specified in DT");
 
-// DEVICE TREE STRUCTURE
-const struct device *adxl1362_sens = DEVICE_DT_GET(DEFAULT_ADXL362_NODE);
 
-// CS CONTROL
-struct spi_cs_control ctrl = {
-        .gpio = SPI_CS_GPIOS_DT_SPEC_GET(DT_NODELABEL(adxl362)),
-        .delay = 2,
+
+// #define DEFAULT_ADXL362_NODE DT_ALIAS(adxl362)
+// BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_ADXL362_NODE, okay),
+// 			 "ADXL362 not specified in DT");
+
+// // DEVICE TREE STRUCTURE
+// const struct device *adxl1362_sens = DEVICE_DT_GET(DEFAULT_ADXL362_NODE);
+
+
+
+#define MY_SPI_MASTER DT_ALIAS(adxl362)
+const struct device *spi_dev;
+
+struct spi_cs_control spim_cs = {
+	.gpio = SPI_CS_GPIOS_DT_SPEC_GET(DT_NODELABEL(adxl362)),
+	.delay = 0,
 };
 
-// SPI CONFIG
 static const struct spi_config spi_cfg = {
-	.operation = SPI_WORD_SET(8) | SPI_TRANSFER_MSB,
-	.frequency = 1000000, // 1 mhz
+	.operation = SPI_WORD_SET(8) | SPI_TRANSFER_MSB |
+				 SPI_MODE_CPOL | SPI_MODE_CPHA,
+	.frequency = 4000000,
 	.slave = 0,
-	.cs = &ctrl,
+	.cs = &spim_cs,
 };
+
+
+
+
+struct spi_dt_spec spec = SPI_DT_SPEC_GET(DT_NODELABEL(adxl362), SPI_WORD_SET(8) | SPI_MODE_GET(0), 1);
 
 int main(void)
 {
 	int err;
 	printk("Program started \n");
+	if (spi_is_ready(&spec) == true){
+		printk("SPI is ready \n");
+	}
+	else{
+		printk("SPI is not ready \n");
+	}
+
+
+
+	spi_dev = DEVICE_DT_GET(MY_SPI_MASTER);
+	if(!device_is_ready(spi_dev)) {
+		printk("SPI master device not ready!\n");
+	}
+	else{
+		printk("SPI master device is ready!\n");
+	}
+
+
+
+
 	uint8_t values[1];
 	while (1)
 	{
@@ -56,7 +88,7 @@ int main(void)
 		}
 		else
 		{
-			printk("Register chip ID: %d\n", values[0]);
+			printk("Register chip ID:%.2x\n", values[0]);
 			k_msleep(1000);
 		}
 	}
@@ -89,16 +121,21 @@ static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 		.buffers = &rx_spi_buf,
 		.count = 1};
 
-	err = spi_transceive(adxl1362_sens, &spi_cfg, &spi_tx_buffer_set, &spi_rx_buffer_set);
+	err = spi_transceive(spi_dev, &spi_cfg, &spi_tx_buffer_set, &spi_rx_buffer_set);
+	//err = spi_transceive_dt(&spec, &spi_tx_buffer_set, &spi_rx_buffer_set);
+	//err = spi_transceive(spi_dev_test, &spi_cfg, &spi_tx_buffer_set, &spi_rx_buffer_set);
 	if (err)
 	{
 		printk("SPI error: %d\n", err);
+		return 0;
 	}
 	else
 	{
 		/* Connect MISO to MOSI for loopback */
-		printk("TX sent: %x\n", tx_buffer[0]);
-		printk("RX recv: %x\n", values[0]);
+		printk("TX sent[0]: %.2x\n", tx_buffer[0]);
+		printk("TX sent[1]: %.2x\n", tx_buffer[1]);
+		printk("RX recv: %.2x\n", values[0]);
 		tx_buffer[0]++;
+		return 1;
 	}
 }
