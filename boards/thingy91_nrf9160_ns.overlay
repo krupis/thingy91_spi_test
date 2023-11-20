@@ -1,12 +1,7 @@
-/ {
-    aliases {
-            adxl362 = &adxl362;
-    };
-};
 
 
 
-&spi3 {
+my_spi_master: &spi3 {
 	compatible = "nordic,nrf-spim";
 	status = "okay";
 	cs-gpios = <&gpio0 8 GPIO_ACTIVE_LOW>, <&gpio0 7 GPIO_ACTIVE_LOW>;
@@ -17,7 +12,6 @@
 	adxl362: adxl362@0 {
 		compatible = "adi,adxl362";
 		spi-max-frequency = <8000000>;
-        label = "spi_dev1";
 		reg = <0>;
 		int1-gpios = <&gpio0 9 0>;
 	};
