@@ -3,7 +3,6 @@
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/spi.h>
 #include <zephyr/device.h>
-#include <zephyr/drivers/gpio.h>
 
 #define LOG_LEVEL CONFIG_LOG_DEFAULT_LEVEL
 #include <zephyr/logging/log.h>
@@ -14,68 +13,24 @@ LOG_MODULE_REGISTER(main);
 #define ADXL362_READ_FIFO 0x0D
 
 #define ADXL362_REG_DEVID_AD 0x00
-#define ADXL362_REG_DEVID_MST 0x01
-#define ADXL362_REG_PARTID 0x02
-
 
 static int readRegister(uint8_t reg, uint8_t *values, uint8_t size);
 
-
-
-
-// #define DEFAULT_ADXL362_NODE DT_ALIAS(adxl362)
-// BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_ADXL362_NODE, okay),
-// 			 "ADXL362 not specified in DT");
-
-// // DEVICE TREE STRUCTURE
-// const struct device *adxl1362_sens = DEVICE_DT_GET(DEFAULT_ADXL362_NODE);
-
-
-
 #define MY_SPI_MASTER DT_ALIAS(adxl362)
-const struct device *spi_dev;
-
-struct spi_cs_control spim_cs = {
-	.gpio = SPI_CS_GPIOS_DT_SPEC_GET(DT_NODELABEL(adxl362)),
-	.delay = 0,
-};
-
-static const struct spi_config spi_cfg = {
-	.operation = SPI_WORD_SET(8) | SPI_TRANSFER_MSB |
-				 SPI_MODE_CPOL | SPI_MODE_CPHA,
-	.frequency = 4000000,
-	.slave = 0,
-	.cs = &spim_cs,
-};
-
-
-
-
 struct spi_dt_spec spec = SPI_DT_SPEC_GET(DT_NODELABEL(adxl362), SPI_WORD_SET(8) | SPI_MODE_GET(0), 1);
 
 int main(void)
 {
 	int err;
 	printk("Program started \n");
-	if (spi_is_ready(&spec) == true){
+	if (spi_is_ready(&spec) == true)
+	{
 		printk("SPI is ready \n");
 	}
-	else{
+	else
+	{
 		printk("SPI is not ready \n");
 	}
-
-
-
-	spi_dev = DEVICE_DT_GET(MY_SPI_MASTER);
-	if(!device_is_ready(spi_dev)) {
-		printk("SPI master device not ready!\n");
-	}
-	else{
-		printk("SPI master device is ready!\n");
-	}
-
-
-
 
 	uint8_t values[1];
 	while (1)
@@ -96,8 +51,12 @@ int main(void)
 }
 
 
-//According to the ADXL362 datasheet (https://www.analog.com/media/en/technical-documentation/data-sheets/adxl362.pdf)
-//Figure 36, we follow multi byte structure where first byte is ADXL362_READ_REG and second byte is the register address
+
+
+
+
+// According to the ADXL362 datasheet (https://www.analog.com/media/en/technical-documentation/data-sheets/adxl362.pdf)
+// Figure 36, we follow multi byte structure where first byte is ADXL362_READ_REG and second byte is the register address
 static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 {
 	int err;
@@ -121,9 +80,8 @@ static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 		.buffers = &rx_spi_buf,
 		.count = 1};
 
-	err = spi_transceive(spi_dev, &spi_cfg, &spi_tx_buffer_set, &spi_rx_buffer_set);
-	//err = spi_transceive_dt(&spec, &spi_tx_buffer_set, &spi_rx_buffer_set);
-	//err = spi_transceive(spi_dev_test, &spi_cfg, &spi_tx_buffer_set, &spi_rx_buffer_set);
+	err = spi_transceive_dt(&spec, &spi_tx_buffer_set, &spi_rx_buffer_set);
+
 	if (err)
 	{
 		printk("SPI error: %d\n", err);
