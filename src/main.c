@@ -14,43 +14,40 @@ LOG_MODULE_REGISTER(main);
 #define ADXL362_READ_FIFO 0x0D
 
 #define ADXL362_REG_DEVID_AD 0x00
+#define ADXL362_REG_DEVID_MST 0x01
 
 static int readRegister(uint8_t reg, uint8_t *values, uint8_t size);
 
-#define DEFAULT_ADXL362_NODE DT_ALIAS(adxl362)
-BUILD_ASSERT(DT_NODE_HAS_STATUS(DEFAULT_ADXL362_NODE, okay),
-			 "ADXL362 not specified in DT");
+/* Devicetree node corresponding to the peripheral to be used via Zephyr SPI
+ * driver (SPIM1), in the background transfer.
+ */
+#define SPI_DEV_NODE DT_NODELABEL(spi3)
+const struct device *const spi_dev = DEVICE_DT_GET(SPI_DEV_NODE);
 
-// DEVICE TREE STRUCTURE
-const struct device *adxl1362_sens = DEVICE_DT_GET(DEFAULT_ADXL362_NODE);
-
-// CS CONTROL
-struct spi_cs_control ctrl = {
-	.gpio = SPI_CS_GPIOS_DT_SPEC_GET(DT_NODELABEL(adxl362)),
-	.delay = 2,
-};
-
-// SPI CONFIG
-static const struct spi_config spi_cfg = {
-	.operation = SPI_WORD_SET(8) | SPI_TRANSFER_MSB,
-	.frequency = 1000000, // 1 mhz
-	.slave = 0,
-	.cs = &ctrl,
+static const struct spi_config spi_dev_cfg = {
+	.operation = SPI_OP_MODE_MASTER | SPI_WORD_SET(8) |
+				 SPI_TRANSFER_MSB,
+	.frequency = 1000000,
+	.cs = {
+		.gpio = GPIO_DT_SPEC_GET(SPI_DEV_NODE, cs_gpios),
+	},
 };
 
 int main(void)
 {
 	int err;
 	printk("Program started \n");
-	if (!device_is_ready(adxl1362_sens))
+
+	if (!device_is_ready(spi_dev))
 	{
-		printk("sensor: device %s not ready.\n", adxl1362_sens->name);
+		printk("%s is not ready\n", spi_dev->name);
 		return 0;
 	}
+
 	uint8_t values[1];
 	while (1)
 	{
-		int ret = readRegister(ADXL362_REG_DEVID_AD, values, 1);
+		int ret = readRegister(ADXL362_REG_DEVID_MST, values, 1);
 		if (ret == 0)
 		{
 			printk("Read chip ID failed \n");
@@ -76,7 +73,7 @@ static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 
 	struct spi_buf tx_spi_buf = {
 		.buf = tx_buffer,
-		.len = sizeof(tx_buffer)};
+		.len = 2};
 
 	struct spi_buf_set spi_tx_buffer_set = {
 		.buffers = &tx_spi_buf,
@@ -90,7 +87,7 @@ static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 		.buffers = &rx_spi_buf,
 		.count = 1};
 
-	err = spi_transceive(adxl1362_sens, &spi_cfg, &spi_tx_buffer_set, &spi_rx_buffer_set);
+	err = spi_transceive(spi_dev, &spi_dev_cfg, &spi_tx_buffer_set, &spi_rx_buffer_set);
 	if (err)
 	{
 		printk("SPI error: %d\n", err);
