@@ -42,6 +42,11 @@ int main(void)
 {
 	int err;
 	printk("Program started \n");
+	if (!device_is_ready(adxl1362_sens))
+	{
+		printk("sensor: device %s not ready.\n", adxl1362_sens->name);
+		return 0;
+	}
 	uint8_t values[1];
 	while (1)
 	{
