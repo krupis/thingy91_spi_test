@@ -9,7 +9,6 @@
 #include <zephyr/logging/log.h>
 LOG_MODULE_REGISTER(main);
 
-
 // Define the CS pin
 #define CS_PIN 8
 const struct device *gpio_dev;
