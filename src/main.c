@@ -87,13 +87,5 @@ static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 		printk("SPI error: %d\n", err);
 		return 0;
 	}
-	else
-	{
-		/* Connect MISO to MOSI for loopback */
-		printk("TX sent[0]: %.2x\n", tx_buffer[0]);
-		printk("TX sent[1]: %.2x\n", tx_buffer[1]);
-		printk("RX recv: %.2x\n", values[0]);
-		tx_buffer[0]++;
-		return 1;
-	}
+	return 1;
 }
