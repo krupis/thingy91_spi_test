@@ -14,9 +14,6 @@ LOG_MODULE_REGISTER(main);
 #define ADXL362_READ_FIFO 0x0D
 
 #define ADXL362_REG_DEVID_AD 0x00
-#define ADXL362_REG_DEVID_MST 0x01
-#define ADXL362_REG_PARTID 0x02
-
 
 static int readRegister(uint8_t reg, uint8_t *values, uint8_t size);
 
@@ -29,8 +26,8 @@ const struct device *adxl1362_sens = DEVICE_DT_GET(DEFAULT_ADXL362_NODE);
 
 // CS CONTROL
 struct spi_cs_control ctrl = {
-        .gpio = SPI_CS_GPIOS_DT_SPEC_GET(DT_NODELABEL(adxl362)),
-        .delay = 2,
+	.gpio = SPI_CS_GPIOS_DT_SPEC_GET(DT_NODELABEL(adxl362)),
+	.delay = 2,
 };
 
 // SPI CONFIG
@@ -63,9 +60,8 @@ int main(void)
 	return 0;
 }
 
-
-//According to the ADXL362 datasheet (https://www.analog.com/media/en/technical-documentation/data-sheets/adxl362.pdf)
-//Figure 36, we follow multi byte structure where first byte is ADXL362_READ_REG and second byte is the register address
+// According to the ADXL362 datasheet (https://www.analog.com/media/en/technical-documentation/data-sheets/adxl362.pdf)
+// Figure 36, we follow multi byte structure where first byte is ADXL362_READ_REG and second byte is the register address
 static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 {
 	int err;
@@ -93,12 +89,7 @@ static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 	if (err)
 	{
 		printk("SPI error: %d\n", err);
+		return 0;
 	}
-	else
-	{
-		/* Connect MISO to MOSI for loopback */
-		printk("TX sent: %x\n", tx_buffer[0]);
-		printk("RX recv: %x\n", values[0]);
-		tx_buffer[0]++;
-	}
+	return 1;
 }
