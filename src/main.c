@@ -55,7 +55,7 @@ int main(void)
 		}
 		else
 		{
-			printk("Register chip ID: %d\n", values[0]);
+			printk("Register chip ID: %.2x\n", values[0]);
 			k_msleep(1000);
 		}
 	}
@@ -79,13 +79,23 @@ static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 		.buffers = &tx_spi_buf,
 		.count = 1};
 
-	struct spi_buf rx_spi_buf = {
-		.buf = values,
-		.len = size};
+	struct spi_buf rx_spi_buf[] = {
+		{.buf = NULL,
+		 .len = sizeof(tx_buffer)},
+		{.buf = values,
+		 .len = size}};
 
 	struct spi_buf_set spi_rx_buffer_set = {
-		.buffers = &rx_spi_buf,
-		.count = 1};
+		.buffers = rx_spi_buf,
+		.count = ARRAY_SIZE(rx_spi_buf)};
+
+	// struct spi_buf rx_spi_buf = {
+	// 	.buf = values,
+	// 	.len = size};
+
+	// struct spi_buf_set spi_rx_buffer_set = {
+	// 	.buffers = &rx_spi_buf,
+	// 	.count = 1};
 
 	err = spi_transceive(spi_dev, &spi_dev_cfg, &spi_tx_buffer_set, &spi_rx_buffer_set);
 	if (err)
