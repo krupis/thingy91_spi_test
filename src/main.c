@@ -13,6 +13,7 @@ LOG_MODULE_REGISTER(main);
 #define ADXL362_READ_FIFO 0x0D
 
 #define ADXL362_REG_DEVID_AD 0x00
+#define ADXL362_REG_DEVID_MST 0x01
 
 static int readRegister(uint8_t reg, uint8_t *values, uint8_t size);
 
@@ -32,10 +33,10 @@ int main(void)
 		printk("SPI is not ready \n");
 	}
 
-	uint8_t values[1];
+	uint8_t values[3];
 	while (1)
 	{
-		int ret = readRegister(ADXL362_REG_DEVID_AD, values, 1);
+		int ret = readRegister(ADXL362_REG_DEVID_MST, values, 3);
 		if (ret == 0)
 		{
 			printk("Read chip ID failed \n");
@@ -43,17 +44,12 @@ int main(void)
 		}
 		else
 		{
-			printk("Register chip ID:%.2x\n", values[0]);
+			printk("Register chip ID:%.2x\n", values[2]);
 			k_msleep(1000);
 		}
 	}
 	return 0;
 }
-
-
-
-
-
 
 // According to the ADXL362 datasheet (https://www.analog.com/media/en/technical-documentation/data-sheets/adxl362.pdf)
 // Figure 36, we follow multi byte structure where first byte is ADXL362_READ_REG and second byte is the register address
@@ -79,6 +75,8 @@ static int readRegister(uint8_t reg, uint8_t *values, uint8_t size)
 	struct spi_buf_set spi_rx_buffer_set = {
 		.buffers = &rx_spi_buf,
 		.count = 1};
+
+
 
 	err = spi_transceive_dt(&spec, &spi_tx_buffer_set, &spi_rx_buffer_set);
 
